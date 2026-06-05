@@ -31,6 +31,8 @@ namespace API.Controllers
             _context = authDbContext;
         }
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //[Authorize(Roles = "Admin")]  de momento deshabilitamos , pero la creacion de los roles solo tiene que ser llevada a cabo por el admin
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
@@ -48,7 +50,7 @@ namespace API.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            var roleResult = await _userManager.AddToRoleAsync(user, "User");
+            var roleResult = await _userManager.AddToRoleAsync(user,dto.Role);
 
             if (!roleResult.Succeeded)
             {
@@ -65,45 +67,13 @@ namespace API.Controllers
             return Ok("Usuario creado correctamente");
         }
 
-        [HttpPost("registerAdmin")]
-        public async Task<IActionResult> RegisterAdmin(RegisterDto dto)
-        {
-            var user = new AppUser
-            {
-                UserName = dto.UserName,
-                Email = dto.Email,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            var result = await _userManager.CreateAsync(user, dto.Password);
-
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
-
-            var roleResult = await _userManager.AddToRoleAsync(user, "Admin");
-
-            if (!roleResult.Succeeded)
-            {
-
-                await _userManager.DeleteAsync(user);
-
-                return BadRequest(new
-                {
-                    message = "Error asignando rol, usuario eliminado",
-                    errors = roleResult.Errors
-                });
-            }
-
-            return Ok("Usuario creado correctamente");
-        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var user = await _userManager.FindByEmailAsync(dto.Email);
+            var user = await _userManager.FindByNameAsync(dto.UserName);
 
             if (user == null)
                 return Unauthorized("Usuario no encontrado");
@@ -139,20 +109,8 @@ namespace API.Controllers
             });
         }
 
-        [Authorize(Roles = "User")]
-        [HttpGet("testUser")]
-        public IActionResult TestUser()
-        {
-            return Ok("usuario autorizado");
-        }
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet("testAdmin")]
-        public IActionResult Test()
-        {
-            return Ok("Admin autorizado");
-        }
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////
         [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
@@ -178,7 +136,7 @@ namespace API.Controllers
             return Ok();
         }
 
-
+        //////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenDto dto)
         {
@@ -220,6 +178,40 @@ namespace API.Controllers
                 refreshToken = newRefreshToken.Token
             });
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //  TEST DE ROLES 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [Authorize(Roles = "Waitress")]
+        [HttpGet("testWaitress")]
+        public IActionResult TestUser()
+        {
+            return Ok("mecera autorizado");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("testAdmin")]
+        public IActionResult TestAdmin()
+        {
+            return Ok("Admin autorizado");
+        }
+
+        [Authorize(Roles = "kitchen")]
+        [HttpGet("testkitchen")]
+        public IActionResult Testkitchen()
+        {
+            return Ok("cocinero autorizado");
+        }
+
+        [Authorize(Roles = "cashier")]
+        [HttpGet("testcashier")]
+        public IActionResult Test()
+        {
+            return Ok("cajero autorizado");
+        }
+
+
 
     }
 }

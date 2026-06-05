@@ -106,27 +106,13 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-async Task SeedRoles(IServiceProvider serviceProvider)
-{
-    var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    string[] roles = { "Admin", "User" };
-
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            await roleManager.CreateAsync(new IdentityRole(role));
-        }
-    }
-}
 
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    await SeedRoles(services);
+    await Seeders.SeedAsync(scope.ServiceProvider);
 }
 
 
