@@ -31,8 +31,15 @@ namespace API.Controllers
             _context = authDbContext;
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        //[Authorize(Roles = "Admin")]  de momento deshabilitamos , pero la creacion de los roles solo tiene que ser llevada a cabo por el admin
+        [Authorize(Roles = "Admin")]
+        [HttpGet("roles")]
+        public async Task<IActionResult> GetAll()
+        {
+            var roles = await _context.Roles.ToListAsync();
+            return Ok(roles);
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto dto)
         {
