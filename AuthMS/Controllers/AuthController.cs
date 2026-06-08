@@ -33,10 +33,31 @@ namespace API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("roles")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllRoles()
         {
-            var roles = await _context.Roles.ToListAsync();
+            var roles = await _context.Roles
+                .Select(r => new RoleResponseDto
+                {
+                    Id = r.Id,
+                    NormalizedName = r.NormalizedName
+                }).ToListAsync();
             return Ok(roles);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _context.Users
+                .Select(u => new UserResponseDto
+                {
+                    LastName = u.LastName,
+                    Id = u.Id,
+                    UserName = u.UserName,
+                    Email = u.Email
+                })
+                .ToListAsync();
+            return Ok(users);
         }
 
         [Authorize(Roles = "Admin")]
@@ -73,9 +94,6 @@ namespace API.Controllers
 
             return Ok("Usuario creado correctamente");
         }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
@@ -116,8 +134,6 @@ namespace API.Controllers
             });
         }
 
-
-        //////////////////////////////////////////////////////////////////////////////////////////////////
         [Authorize]
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
@@ -137,13 +153,10 @@ namespace API.Controllers
             {
                 token.RevokedAt = DateTime.UtcNow;
             }
-
             await _context.SaveChangesAsync();
-
             return Ok();
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh(RefreshTokenDto dto)
         {
