@@ -51,8 +51,9 @@ namespace API.Controllers
             var users = await _context.Users
                 .Select(u => new UserResponseDto
                 {
-                    LastName = u.LastName,
                     Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
                     UserName = u.UserName,
                     Email = u.Email
                 })
