@@ -200,6 +200,78 @@ namespace API.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("user/{id}")]
+        public async Task<IActionResult> UpdateUser(string id, UpdateUserDto dto)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound(new { message = "Usuario no encontrado" });
+
+            if (!string.IsNullOrEmpty(dto.UserName) && dto.UserName != user.UserName)
+            {
+                var usernameResult = await _userManager.SetUserNameAsync(user, dto.UserName);
+                if (!usernameResult.Succeeded)
+                    return BadRequest(new { message = "Error actualizando username", errors = usernameResult.Errors });
+            }
+
+            if (!string.IsNullOrEmpty(dto.Email) && dto.Email != user.Email)
+            {
+                var emailResult = await _userManager.SetEmailAsync(user, dto.Email);
+                if (!emailResult.Succeeded)
+                    return BadRequest(new { message = "Error actualizando email", errors = emailResult.Errors });
+            }
+
+            if (!string.IsNullOrEmpty(dto.FirstName))
+            {
+                user.FirstName = dto.FirstName;
+            }
+
+            if (!string.IsNullOrEmpty(dto.LastName))
+            {
+                user.LastName = dto.LastName;
+            }
+
+            if (!string.IsNullOrEmpty(dto.NewPassword))
+            {
+                var passwordResult = await _userManager.RemovePasswordAsync(user);
+                if (!passwordResult.Succeeded)
+                    return BadRequest(new { message = "Error removiendo contraseña actual", errors = passwordResult.Errors });
+
+                var addPasswordResult = await _userManager.AddPasswordAsync(user, dto.NewPassword);
+                if (!addPasswordResult.Succeeded)
+                    return BadRequest(new { message = "Error estableciendo nueva contraseña", errors = addPasswordResult.Errors });
+            }
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+                return BadRequest(new { message = "Error guardando cambios", errors = updateResult.Errors });
+
+            return Ok(new { message = "Usuario actualizado correctamente" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("user/{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return NotFound(new { message = "Usuario no encontrado" });
+
+            var currentUserId = await _userManager.GetUserIdAsync(user);
+            if (user.Id == currentUserId)
+                return BadRequest(new { message = "No puedes eliminar tu propia cuenta" });
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+                return BadRequest(new { message = "Error eliminando usuario", errors = result.Errors });
+
+            return Ok(new { message = "Usuario eliminado correctamente" });
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //  TEST DE ROLES 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////
