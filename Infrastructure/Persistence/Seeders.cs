@@ -51,8 +51,8 @@ namespace Infrastructure.Persistence
                 {
                     UserName = "admin",
                     Email = "admin@admin.com",
-                    FirstName = "System",
-                    LastName = "Administrator",
+                    FirstName = "Michael",
+                    LastName = "London",
                     CreatedAt = DateTime.UtcNow
                 };
 

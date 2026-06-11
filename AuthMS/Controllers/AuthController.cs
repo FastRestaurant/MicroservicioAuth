@@ -48,17 +48,26 @@ namespace API.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _context.Users
-                .Select(u => new UserResponseDto
+            var users = _userManager.Users.ToList();
+
+            var result = new List<UserResponseDto>();
+
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+
+                result.Add(new UserResponseDto
                 {
-                    Id = u.Id,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
-                    UserName = u.UserName,
-                    Email = u.Email
-                })
-                .ToListAsync();
-            return Ok(users);
+                    Id = user.Id,
+                    Role = roles.FirstOrDefault(),
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    UserName = user.UserName,
+                    Email = user.Email
+                });
+            }
+
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin")]
@@ -255,16 +264,18 @@ namespace API.Controllers
         [HttpDelete("user/{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var userDelete = await _userManager.FindByIdAsync(id);
 
-            if (user == null)
+            if (userDelete == null)
                 return NotFound(new { message = "Usuario no encontrado" });
 
-            var currentUserId = await _userManager.GetUserIdAsync(user);
-            if (user.Id == currentUserId)
+            var admin = await _userManager.FindByNameAsync("admin");
+            var currentUserId = admin.Id;
+
+            if (userDelete.Id == currentUserId)
                 return BadRequest(new { message = "No puedes eliminar tu propia cuenta" });
 
-            var result = await _userManager.DeleteAsync(user);
+            var result = await _userManager.DeleteAsync(userDelete);
 
             if (!result.Succeeded)
                 return BadRequest(new { message = "Error eliminando usuario", errors = result.Errors });
