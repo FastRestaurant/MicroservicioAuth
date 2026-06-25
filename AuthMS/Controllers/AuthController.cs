@@ -11,7 +11,7 @@ using Infrastructure.Persistence;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -46,16 +46,21 @@ namespace API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("users")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers(int pageNumber = 1, int pageSize = 5)
         {
-            var users = _userManager.Users.ToList();
-
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 5;
+            var query = _userManager.Users;
+            var totalUsers = query.Count();
+            var totalPages = (int)Math.Ceiling((double)totalUsers / pageSize);
+            var users = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
             var result = new List<UserResponseDto>();
-
             foreach (var user in users)
             {
                 var roles = await _userManager.GetRolesAsync(user);
-
                 result.Add(new UserResponseDto
                 {
                     Id = user.Id,
@@ -66,8 +71,14 @@ namespace API.Controllers
                     Email = user.Email
                 });
             }
-
-            return Ok(result);
+            return Ok(new
+            {
+                CurrentPage = pageNumber,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                TotalUsers = totalUsers,
+                Data = result
+            });
         }
 
         [Authorize(Roles = "Admin")]
@@ -283,10 +294,6 @@ namespace API.Controllers
             return Ok(new { message = "Usuario eliminado correctamente" });
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //  TEST DE ROLES 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         [Authorize(Roles = "Waitress")]
         [HttpGet("testWaitress")]
         public IActionResult TestUser()
@@ -314,8 +321,5 @@ namespace API.Controllers
         {
             return Ok("cajero autorizado");
         }
-
-
-
     }
 }
