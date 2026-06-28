@@ -10,22 +10,14 @@ using System;
 using System.Security.Claims;
 using Infrastructure.Service;
 
-
-
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddScoped<JwtService>();
-// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 builder.Services.AddDbContext<AuthDbContext>(options =>
 {
@@ -36,16 +28,12 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 builder.Services
     .AddIdentity<AppUser, IdentityRole>(options =>
     {
-        options.Password.RequiredLength = 4;  // cambiar por 8 luego y todos los false x true 
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireDigit = false;
-        options.Password.RequireNonAlphanumeric = false;
-
-      //  options.Lockout.MaxFailedAccessAttempts = 5;
-      //  options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-
-        options.User.RequireUniqueEmail = false;
+        options.Password.RequiredLength = 8;  
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireDigit = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.User.RequireUniqueEmail = true;
     })
     .AddEntityFrameworkStores<AuthDbContext>()
     .AddDefaultTokenProviders();
@@ -76,8 +64,6 @@ builder.Services
     };
 });
 
-
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -106,8 +92,6 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
-
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -115,8 +99,6 @@ using (var scope = app.Services.CreateScope())
     await Seeders.SeedAsync(scope.ServiceProvider);
 }
 
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -124,10 +106,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
