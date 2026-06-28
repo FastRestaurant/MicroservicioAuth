@@ -64,7 +64,7 @@ namespace API.Controllers
                 result.Add(new UserResponseDto
                 {
                     Id = user.Id,
-                    Role = roles.FirstOrDefault(),
+                    Role = roles.FirstOrDefault() ?? "SIN ROL",
                     FirstName = user.FirstName,
                     LastName = user.LastName,
                     UserName = user.UserName,
@@ -229,44 +229,93 @@ namespace API.Controllers
             if (user == null)
                 return NotFound(new { message = "Usuario no encontrado" });
 
+            // USERNAME
             if (!string.IsNullOrEmpty(dto.UserName) && dto.UserName != user.UserName)
             {
                 var usernameResult = await _userManager.SetUserNameAsync(user, dto.UserName);
+
                 if (!usernameResult.Succeeded)
-                    return BadRequest(new { message = "Error actualizando username", errors = usernameResult.Errors });
+                    return BadRequest(new
+                    {
+                        message = "Error actualizando username",
+                        errors = usernameResult.Errors
+                    });
             }
 
+            // EMAIL
             if (!string.IsNullOrEmpty(dto.Email) && dto.Email != user.Email)
             {
                 var emailResult = await _userManager.SetEmailAsync(user, dto.Email);
+
                 if (!emailResult.Succeeded)
-                    return BadRequest(new { message = "Error actualizando email", errors = emailResult.Errors });
+                    return BadRequest(new
+                    {
+                        message = "Error actualizando email",
+                        errors = emailResult.Errors
+                    });
             }
 
+            // NOMBRE Y APELLIDO (campos propios)
             if (!string.IsNullOrEmpty(dto.FirstName))
-            {
                 user.FirstName = dto.FirstName;
-            }
 
             if (!string.IsNullOrEmpty(dto.LastName))
-            {
                 user.LastName = dto.LastName;
-            }
 
+            // PASSWORD
             if (!string.IsNullOrEmpty(dto.NewPassword))
             {
-                var passwordResult = await _userManager.RemovePasswordAsync(user);
-                if (!passwordResult.Succeeded)
-                    return BadRequest(new { message = "Error removiendo contraseña actual", errors = passwordResult.Errors });
+                var removePasswordResult = await _userManager.RemovePasswordAsync(user);
+
+                if (!removePasswordResult.Succeeded)
+                    return BadRequest(new
+                    {
+                        message = "Error removiendo contraseña actual",
+                        errors = removePasswordResult.Errors
+                    });
 
                 var addPasswordResult = await _userManager.AddPasswordAsync(user, dto.NewPassword);
+
                 if (!addPasswordResult.Succeeded)
-                    return BadRequest(new { message = "Error estableciendo nueva contraseña", errors = addPasswordResult.Errors });
+                    return BadRequest(new
+                    {
+                        message = "Error estableciendo nueva contraseña",
+                        errors = addPasswordResult.Errors
+                    });
             }
 
-            var updateResult = await _userManager.UpdateAsync(user);
-            if (!updateResult.Succeeded)
-                return BadRequest(new { message = "Error guardando cambios", errors = updateResult.Errors });
+            // ROLES
+            if (!string.IsNullOrEmpty(dto.NewRol))
+            {
+                var currentRoles = await _userManager.GetRolesAsync(user);
+
+                // si no tiene el rol ya asignado
+                if (!currentRoles.Contains(dto.NewRol))
+                {
+                    // remover roles actuales (si querés solo 1 rol por usuario)
+                    foreach (var role in currentRoles)
+                    {
+                        var removeRoleResult = await _userManager.RemoveFromRoleAsync(user, role);
+
+                        if (!removeRoleResult.Succeeded)
+                            return BadRequest(new
+                            {
+                                message = "Error removiendo rol actual",
+                                errors = removeRoleResult.Errors
+                            });
+                    }
+
+                    // agregar nuevo rol
+                    var addRoleResult = await _userManager.AddToRoleAsync(user, dto.NewRol);
+
+                    if (!addRoleResult.Succeeded)
+                        return BadRequest(new
+                        {
+                            message = "Error asignando nuevo rol",
+                            errors = addRoleResult.Errors
+                        });
+                }
+            }
 
             return Ok(new { message = "Usuario actualizado correctamente" });
         }
@@ -321,5 +370,9 @@ namespace API.Controllers
         {
             return Ok("cajero autorizado");
         }
+
+
+
+
     }
 }
