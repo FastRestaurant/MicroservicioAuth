@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Entities;
+using Domain.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,15 +23,7 @@ namespace Infrastructure.Persistence
         {
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            string[] roles =
-            {
-                "Admin",
-                "Waitress",
-                "Kitchen",
-                "Cashier"
-            };
-
-            foreach (var role in roles)
+            foreach (var role in ApplicationRoles.All)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
@@ -56,11 +49,11 @@ namespace Infrastructure.Persistence
                     CreatedAt = DateTime.UtcNow
                 };
 
-                var result = await userManager.CreateAsync(admin, "Admin123");
+                var result = await userManager.CreateAsync(admin, "Admin123!");
 
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    await userManager.AddToRoleAsync(admin, ApplicationRoles.Admin);
                 }
             }
             var firstUser = new AppUser
@@ -71,10 +64,10 @@ namespace Infrastructure.Persistence
                 LastName = "Salas",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateOne = await userManager.CreateAsync(firstUser, "Camarero123");
+            var resultCreateOne = await userManager.CreateAsync(firstUser, "Camarero123!");
             if (resultCreateOne.Succeeded)
             {
-                await userManager.AddToRoleAsync(firstUser, "Waitress");
+                await userManager.AddToRoleAsync(firstUser, ApplicationRoles.Waitress);
             }
 
             var secondUser = new AppUser
@@ -85,10 +78,10 @@ namespace Infrastructure.Persistence
                 LastName = "La Paz",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateTwo = await userManager.CreateAsync(secondUser, "Cocinero123");
+            var resultCreateTwo = await userManager.CreateAsync(secondUser, "Cocinero123!");
             if (resultCreateTwo.Succeeded)
             {
-                await userManager.AddToRoleAsync(secondUser, "Kitchen");
+                await userManager.AddToRoleAsync(secondUser, ApplicationRoles.Kitchen);
             }
 
             var thirdUser = new AppUser
@@ -99,10 +92,10 @@ namespace Infrastructure.Persistence
                 LastName = "Navarro",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateThree = await userManager.CreateAsync(thirdUser, "Cajero123");
+            var resultCreateThree = await userManager.CreateAsync(thirdUser, "Cajero123!");
             if (resultCreateThree.Succeeded)
             {
-                await userManager.AddToRoleAsync(thirdUser, "Cashier");
+                await userManager.AddToRoleAsync(thirdUser, ApplicationRoles.Cashier);
             }
 
             var fourthUser = new AppUser
@@ -113,10 +106,10 @@ namespace Infrastructure.Persistence
                 LastName = "Fradera",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateFour = await userManager.CreateAsync(fourthUser, "Cajero123");
+            var resultCreateFour = await userManager.CreateAsync(fourthUser, "Cajero123!");
             if (resultCreateFour.Succeeded)
             {
-                await userManager.AddToRoleAsync(fourthUser, "Cashier");
+                await userManager.AddToRoleAsync(fourthUser, ApplicationRoles.Cashier);
             }
 
             var fifthUser = new AppUser
@@ -127,10 +120,10 @@ namespace Infrastructure.Persistence
                 LastName = "Masksymowicz",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateFive = await userManager.CreateAsync(fifthUser, "Camarero123");
+            var resultCreateFive = await userManager.CreateAsync(fifthUser, "Camarero123!");
             if (resultCreateFive.Succeeded)
             {
-                await userManager.AddToRoleAsync(fifthUser, "Waitress");
+                await userManager.AddToRoleAsync(fifthUser, ApplicationRoles.Waitress);
             }
 
             var sixthUser = new AppUser
@@ -141,10 +134,10 @@ namespace Infrastructure.Persistence
                 LastName = "Vallejos",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateSix = await userManager.CreateAsync(sixthUser, "Cocinero123");
+            var resultCreateSix = await userManager.CreateAsync(sixthUser, "Cocinero123!");
             if (resultCreateSix.Succeeded)
             {
-                await userManager.AddToRoleAsync(sixthUser, "Kitchen");
+                await userManager.AddToRoleAsync(sixthUser, ApplicationRoles.Kitchen);
             }
 
             var seventhUser = new AppUser
@@ -155,10 +148,10 @@ namespace Infrastructure.Persistence
                 LastName = "Coronel",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateSeven = await userManager.CreateAsync(seventhUser, "Cajero123");
+            var resultCreateSeven = await userManager.CreateAsync(seventhUser, "Cajero123!");
             if (resultCreateSeven.Succeeded)
             {
-                await userManager.AddToRoleAsync(seventhUser, "Cashier");
+                await userManager.AddToRoleAsync(seventhUser, ApplicationRoles.Cashier);
             }
 
             var eighthUser = new AppUser
@@ -169,10 +162,10 @@ namespace Infrastructure.Persistence
                 LastName = "Rodrigues",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateEight = await userManager.CreateAsync(eighthUser, "Camarero123");
+            var resultCreateEight = await userManager.CreateAsync(eighthUser, "Camarero123!");
             if (resultCreateEight.Succeeded)
             {
-                await userManager.AddToRoleAsync(eighthUser, "Waitress");
+                await userManager.AddToRoleAsync(eighthUser, ApplicationRoles.Waitress);
             }
 
             var ninethUser = new AppUser
@@ -183,10 +176,10 @@ namespace Infrastructure.Persistence
                 LastName = "Paco",
                 CreatedAt = DateTime.UtcNow
             };
-            var resultCreateNine = await userManager.CreateAsync(ninethUser, "Cocinero123");
+            var resultCreateNine = await userManager.CreateAsync(ninethUser, "Cocinero123!");
             if (resultCreateNine.Succeeded)
             {
-                await userManager.AddToRoleAsync(ninethUser, "Kitchen");
+                await userManager.AddToRoleAsync(ninethUser, ApplicationRoles.Kitchen);
             }
 
             var newUser = new AppUser
@@ -197,10 +190,10 @@ namespace Infrastructure.Persistence
                 LastName = "Gomez",
                 CreatedAt = DateTime.UtcNow
             };
-            var newResultCreate = await userManager.CreateAsync(newUser, "Cajero123");
+            var newResultCreate = await userManager.CreateAsync(newUser, "Cajero123!");
             if (newResultCreate.Succeeded)
             {
-                await userManager.AddToRoleAsync(newUser, "Cashier");
+                await userManager.AddToRoleAsync(newUser, ApplicationRoles.Cashier);
             }
         }
     }

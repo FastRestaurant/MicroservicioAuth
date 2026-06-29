@@ -41,8 +41,12 @@ namespace Infrastructure.Service
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
+            var jwtKey = _config["Jwt:Key"];
+            if (string.IsNullOrWhiteSpace(jwtKey))
+                throw new InvalidOperationException("Falta la configuracion Jwt:Key.");
+
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+                Encoding.UTF8.GetBytes(jwtKey)
             );
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -66,6 +70,14 @@ namespace Infrastructure.Service
             rng.GetBytes(randomBytes);
 
             return Convert.ToBase64String(randomBytes);
+        }
+
+        public string HashRefreshToken(string refreshToken)
+        {
+            var tokenBytes = Encoding.UTF8.GetBytes(refreshToken);
+            var hashBytes = SHA256.HashData(tokenBytes);
+
+            return Convert.ToHexString(hashBytes);
         }
     }
 }

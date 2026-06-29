@@ -19,5 +19,20 @@ namespace Infrastructure.Persistence
         }
 
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            builder.Entity<RefreshToken>(entity =>
+            {
+                entity.Property(token => token.TokenHash)
+                    .IsRequired()
+                    .HasMaxLength(64);
+
+                entity.HasIndex(token => token.TokenHash)
+                    .IsUnique();
+            });
+        }
     }
 }
