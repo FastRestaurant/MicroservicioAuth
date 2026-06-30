@@ -84,34 +84,6 @@ namespace Infrastructure.Persistence
                 await userManager.AddToRoleAsync(secondUser, ApplicationRoles.Kitchen);
             }
 
-            var thirdUser = new AppUser
-            {
-                UserName = "Gcajero",
-                Email = "gaby@gmail.com",
-                FirstName = "Gabriel",
-                LastName = "Navarro",
-                CreatedAt = DateTime.UtcNow
-            };
-            var resultCreateThree = await userManager.CreateAsync(thirdUser, "Cajero123!");
-            if (resultCreateThree.Succeeded)
-            {
-                await userManager.AddToRoleAsync(thirdUser, ApplicationRoles.Cashier);
-            }
-
-            var fourthUser = new AppUser
-            {
-                UserName = "Fcajero",
-                Email = "fede@gmail.com",
-                FirstName = "Federico",
-                LastName = "Fradera",
-                CreatedAt = DateTime.UtcNow
-            };
-            var resultCreateFour = await userManager.CreateAsync(fourthUser, "Cajero123!");
-            if (resultCreateFour.Succeeded)
-            {
-                await userManager.AddToRoleAsync(fourthUser, ApplicationRoles.Cashier);
-            }
-
             var fifthUser = new AppUser
             {
                 UserName = "Tcamarero",
@@ -140,20 +112,6 @@ namespace Infrastructure.Persistence
                 await userManager.AddToRoleAsync(sixthUser, ApplicationRoles.Kitchen);
             }
 
-            var seventhUser = new AppUser
-            {
-                UserName = "Ncajero",
-                Email = "nahuc@gmail.com",
-                FirstName = "Nahuel",
-                LastName = "Coronel",
-                CreatedAt = DateTime.UtcNow
-            };
-            var resultCreateSeven = await userManager.CreateAsync(seventhUser, "Cajero123!");
-            if (resultCreateSeven.Succeeded)
-            {
-                await userManager.AddToRoleAsync(seventhUser, ApplicationRoles.Cashier);
-            }
-
             var eighthUser = new AppUser
             {
                 UserName = "Jcamarero",
@@ -180,20 +138,6 @@ namespace Infrastructure.Persistence
             if (resultCreateNine.Succeeded)
             {
                 await userManager.AddToRoleAsync(ninethUser, ApplicationRoles.Kitchen);
-            }
-
-            var newUser = new AppUser
-            {
-                UserName = "Fcajero",
-                Email = "gomezf@gmail.com",
-                FirstName = "Franco",
-                LastName = "Gomez",
-                CreatedAt = DateTime.UtcNow
-            };
-            var newResultCreate = await userManager.CreateAsync(newUser, "Cajero123!");
-            if (newResultCreate.Succeeded)
-            {
-                await userManager.AddToRoleAsync(newUser, ApplicationRoles.Cashier);
             }
         }
     }
