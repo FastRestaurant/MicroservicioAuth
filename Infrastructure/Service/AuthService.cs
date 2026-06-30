@@ -167,7 +167,12 @@ public sealed class AuthService : IAuthService
         var result = await _userManager.CreateAsync(user, dto.Password);
 
         if (!result.Succeeded)
-            return UseCaseResult<string>.BadRequest(string.Empty, ToErrors(result.Errors));
+        {
+            var errors = ToErrors(result.Errors);
+            return HasDuplicateError(errors)
+                ? UseCaseResult<string>.Conflict("Ya existe un usuario con esos datos.", errors)
+                : UseCaseResult<string>.BadRequest(string.Empty, errors);
+        }
 
         var roleResult = await _userManager.AddToRoleAsync(user, role);
 
@@ -299,14 +304,24 @@ public sealed class AuthService : IAuthService
         {
             var usernameResult = await _userManager.SetUserNameAsync(user, dto.UserName);
             if (!usernameResult.Succeeded)
-                return UseCaseResult<string>.BadRequest("Error actualizando username", ToErrors(usernameResult.Errors));
+            {
+                var errors = ToErrors(usernameResult.Errors);
+                return HasDuplicateError(errors)
+                    ? UseCaseResult<string>.Conflict("Ya existe un usuario con ese username.", errors)
+                    : UseCaseResult<string>.BadRequest("Error actualizando username", errors);
+            }
         }
 
         if (!string.IsNullOrEmpty(dto.Email) && dto.Email != user.Email)
         {
             var emailResult = await _userManager.SetEmailAsync(user, dto.Email);
             if (!emailResult.Succeeded)
-                return UseCaseResult<string>.BadRequest("Error actualizando email", ToErrors(emailResult.Errors));
+            {
+                var errors = ToErrors(emailResult.Errors);
+                return HasDuplicateError(errors)
+                    ? UseCaseResult<string>.Conflict("Ya existe un usuario con ese email.", errors)
+                    : UseCaseResult<string>.BadRequest("Error actualizando email", errors);
+            }
         }
 
         if (!string.IsNullOrEmpty(dto.FirstName))
@@ -387,4 +402,11 @@ public sealed class AuthService : IAuthService
             Code = error.Code,
             Description = error.Description
         }).ToArray();
+
+    private static bool HasDuplicateError(IEnumerable<UseCaseError> errors)
+    {
+        return errors.Any(error =>
+            string.Equals(error.Code, nameof(IdentityErrorDescriber.DuplicateUserName), StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(error.Code, nameof(IdentityErrorDescriber.DuplicateEmail), StringComparison.OrdinalIgnoreCase));
+    }
 }

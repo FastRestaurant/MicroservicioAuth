@@ -1,3 +1,4 @@
+using Application.Common;
 using Application.Interfaces;
 using Application.UseCases.Users.Queries.UserExists;
 using Domain.Constants;
@@ -19,6 +20,10 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Exists(string id, CancellationToken cancellationToken)
     {
         var exists = await _userExistsHandler.Handle(new UserExistsQuery
@@ -27,7 +32,12 @@ public class UsersController : ControllerBase
         }, cancellationToken);
 
         if (!exists)
-            return NotFound();
+            return NotFound(new ErrorResponseDto
+            {
+                Message = "Usuario no encontrado",
+                StatusCode = StatusCodes.Status404NotFound,
+                Timestamp = DateTime.UtcNow
+            });
 
         return NoContent();
     }

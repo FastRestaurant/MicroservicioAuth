@@ -4,6 +4,7 @@ public enum UseCaseStatus
 {
     Ok,
     BadRequest,
+    Conflict,
     Unauthorized,
     NotFound
 }
@@ -23,6 +24,9 @@ public sealed class UseCaseResult<T>
 
     public static UseCaseResult<T> BadRequest(string message, IReadOnlyCollection<UseCaseError>? errors = null) =>
         new() { Status = UseCaseStatus.BadRequest, Message = message, Errors = errors ?? Array.Empty<UseCaseError>() };
+
+    public static UseCaseResult<T> Conflict(string message, IReadOnlyCollection<UseCaseError>? errors = null) =>
+        new() { Status = UseCaseStatus.Conflict, Message = message, Errors = errors ?? Array.Empty<UseCaseError>() };
 
     public static UseCaseResult<T> Unauthorized(string? message = null) =>
         new() { Status = UseCaseStatus.Unauthorized, Message = message };

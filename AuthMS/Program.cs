@@ -1,4 +1,5 @@
 using Application.Interfaces;
+using Application.Common;
 using Application.UseCases.Auth.Commands.DeleteUser;
 using Application.UseCases.Auth.Commands.Login;
 using Application.UseCases.Auth.Commands.Logout;
@@ -19,6 +20,8 @@ using Microsoft.EntityFrameworkCore.Design;
 using System;
 using System.Security.Claims;
 using Infrastructure.Service;
+using API.Middlewares;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +38,25 @@ builder.Services.AddScoped<IUpdateUserCommandHandler, UpdateUserCommandHandler>(
 builder.Services.AddScoped<IDeleteUserCommandHandler, DeleteUserCommandHandler>();
 builder.Services.AddScoped<IUserExistsQueryHandler, UserExistsQueryHandler>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Values
+                .SelectMany(modelState => modelState.Errors)
+                .Select(error => string.IsNullOrWhiteSpace(error.ErrorMessage) ? "La solicitud es invalida." : error.ErrorMessage)
+                .ToArray();
+
+            return new BadRequestObjectResult(new ErrorResponseDto
+            {
+                Message = errors.Length == 0 ? "La solicitud es invalida." : string.Join(" ", errors),
+                StatusCode = StatusCodes.Status400BadRequest,
+                Timestamp = DateTime.UtcNow
+            });
+        };
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -133,6 +154,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 if (!string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase))
     app.UseHttpsRedirection();

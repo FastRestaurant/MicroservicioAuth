@@ -51,6 +51,9 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Admin)]
         [HttpGet("roles")]
+        [ProducesResponseType(typeof(IReadOnlyCollection<RoleResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetAllRoles(CancellationToken cancellationToken)
         {
             var result = await _getAllRolesHandler.Handle(new GetAllRolesQuery(), cancellationToken);
@@ -60,6 +63,10 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Admin)]
         [HttpGet("users")]
+        [ProducesResponseType(typeof(UsersPageResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetAllUsers(int pageNumber = 1, int pageSize = 10, string? search = null, string? role = null, CancellationToken cancellationToken = default)
         {
             var result = await _getAllUsersHandler.Handle(new GetAllUsersQuery
@@ -75,6 +82,11 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Admin)]
         [HttpPost("register")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register(RegisterDto dto, CancellationToken cancellationToken)
         {
             var result = await _registerUserHandler.Handle(new RegisterUserCommand
@@ -82,10 +94,15 @@ namespace API.Controllers
                 Dto = dto
             }, cancellationToken);
 
-            return ToActionResult(result);
+            return result.Status == UseCaseStatus.Ok
+                ? Created(string.Empty, result.Data)
+                : ToActionResult(result);
         }
 
         [HttpPost("login")]
+        [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginDto dto, CancellationToken cancellationToken)
         {
             var result = await _loginHandler.Handle(new LoginCommand
@@ -98,6 +115,8 @@ namespace API.Controllers
 
         [Authorize]
         [HttpPost("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Logout(CancellationToken cancellationToken)
         {
             var result = await _logoutHandler.Handle(new LogoutCommand
@@ -109,6 +128,9 @@ namespace API.Controllers
         }
 
         [HttpPost("refresh")]
+        [ProducesResponseType(typeof(RefreshResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Refresh(RefreshTokenDto dto, CancellationToken cancellationToken)
         {
             var result = await _refreshTokenHandler.Handle(new RefreshTokenCommand
@@ -121,6 +143,12 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Admin)]
         [HttpPatch("user/{id}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> UpdateUser(string id, UpdateUserDto dto, CancellationToken cancellationToken)
         {
             var result = await _updateUserHandler.Handle(new UpdateUserCommand
@@ -134,6 +162,11 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Admin)]
         [HttpDelete("user/{id}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteUser(string id, CancellationToken cancellationToken)
         {
             var result = await _deleteUserHandler.Handle(new DeleteUserCommand
@@ -146,6 +179,9 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Waitress)]
         [HttpGet("testWaitress")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public IActionResult TestUser()
         {
             return Ok("mecera autorizado");
@@ -153,6 +189,9 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Admin)]
         [HttpGet("testAdmin")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public IActionResult TestAdmin()
         {
             return Ok("Admin autorizado");
@@ -160,6 +199,9 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Kitchen)]
         [HttpGet("testkitchen")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public IActionResult Testkitchen()
         {
             return Ok("cocinero autorizado");
@@ -167,6 +209,9 @@ namespace API.Controllers
 
         [Authorize(Roles = ApplicationRoles.Cashier)]
         [HttpGet("testcashier")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public IActionResult Test()
         {
             return Ok("cajero autorizado");
@@ -177,10 +222,11 @@ namespace API.Controllers
             return result.Status switch
             {
                 UseCaseStatus.Ok => ToOkResult(result),
-                UseCaseStatus.BadRequest => BadRequest(ToErrorPayload(result)),
-                UseCaseStatus.Unauthorized => string.IsNullOrWhiteSpace(result.Message) ? Unauthorized() : Unauthorized(result.Message),
-                UseCaseStatus.NotFound => NotFound(new { message = result.Message }),
-                _ => BadRequest()
+                UseCaseStatus.BadRequest => BadRequest(ToErrorPayload(result, StatusCodes.Status400BadRequest)),
+                UseCaseStatus.Conflict => Conflict(ToErrorPayload(result, StatusCodes.Status409Conflict)),
+                UseCaseStatus.Unauthorized => Unauthorized(ToErrorPayload(result, StatusCodes.Status401Unauthorized, "No autorizado.")),
+                UseCaseStatus.NotFound => NotFound(ToErrorPayload(result, StatusCodes.Status404NotFound)),
+                _ => BadRequest(ToErrorPayload(result, StatusCodes.Status400BadRequest))
             };
         }
 
@@ -192,15 +238,15 @@ namespace API.Controllers
             return Ok(result.Data);
         }
 
-        private static object ToErrorPayload<T>(UseCaseResult<T> result)
+        private static ErrorResponseDto ToErrorPayload<T>(UseCaseResult<T> result, int statusCode, string defaultMessage = "La solicitud no es válida.")
         {
-            if (result.Errors.Count > 0 && string.IsNullOrWhiteSpace(result.Message))
-                return result.Errors;
-
-            if (result.Errors.Count > 0)
-                return new { message = result.Message, errors = result.Errors };
-
-            return new { message = result.Message };
+            return new ErrorResponseDto
+            {
+                Message = string.IsNullOrWhiteSpace(result.Message) ? defaultMessage : result.Message,
+                StatusCode = statusCode,
+                Timestamp = DateTime.UtcNow,
+                Errors = result.Errors
+            };
         }
     }
 }
