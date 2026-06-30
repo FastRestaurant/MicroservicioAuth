@@ -8,7 +8,7 @@ namespace Application.DTOs
 {
     public class RoleResponseDto
     {
-        public string Id { get; set; }
-        public string NormalizedName { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string NormalizedName { get; set; } = string.Empty;
     }
 }

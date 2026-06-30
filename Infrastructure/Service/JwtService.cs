@@ -6,14 +6,15 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Entities;
+using Application.Interfaces;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Service
 {
-    public class JwtService
+    public class JwtService : IJwtService
     {
         private readonly IConfiguration _config;
         private readonly UserManager<AppUser> _userManager;
@@ -28,11 +29,16 @@ namespace Infrastructure.Service
         {
             var roles = await _userManager.GetRolesAsync(user);
 
+            return GenerateAccessToken(user.Id, user.Email, user.UserName, roles);
+        }
+
+        public string GenerateAccessToken(string userId, string? email, string? userName, IEnumerable<string> roles)
+        {
             var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email, user.Email ?? ""),
-            new Claim(ClaimTypes.Name, user.UserName ?? "")
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Email, email ?? ""),
+            new Claim(ClaimTypes.Name, userName ?? "")
         };
 
            
@@ -55,7 +61,7 @@ namespace Infrastructure.Service
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2), // TIEMPO EN EL CUAL EL TOKEN ES VALIDO 
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: creds
             );
 

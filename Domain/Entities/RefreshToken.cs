@@ -19,7 +19,5 @@ namespace Domain.Entities
         public DateTime? RevokedAt { get; set; }
 
         public string UserId { get; set; } = string.Empty;
-
-        public AppUser User { get; set; } = default!;
     }
 }

@@ -1,5 +1,15 @@
-using Domain.Entities;
+using Application.Interfaces;
+using Application.UseCases.Auth.Commands.DeleteUser;
+using Application.UseCases.Auth.Commands.Login;
+using Application.UseCases.Auth.Commands.Logout;
+using Application.UseCases.Auth.Commands.RefreshToken;
+using Application.UseCases.Auth.Commands.RegisterUser;
+using Application.UseCases.Auth.Commands.UpdateUser;
+using Application.UseCases.Auth.Queries.GetAllRoles;
+using Application.UseCases.Auth.Queries.GetAllUsers;
+using Application.UseCases.Users.Queries.UserExists;
 using System.Text;
+using Infrastructure.Identity;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +23,17 @@ using Infrastructure.Service;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IJwtService>(sp => sp.GetRequiredService<JwtService>());
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IGetAllRolesQueryHandler, GetAllRolesQueryHandler>();
+builder.Services.AddScoped<IGetAllUsersQueryHandler, GetAllUsersQueryHandler>();
+builder.Services.AddScoped<IRegisterUserCommandHandler, RegisterUserCommandHandler>();
+builder.Services.AddScoped<ILoginCommandHandler, LoginCommandHandler>();
+builder.Services.AddScoped<ILogoutCommandHandler, LogoutCommandHandler>();
+builder.Services.AddScoped<IRefreshTokenCommandHandler, RefreshTokenCommandHandler>();
+builder.Services.AddScoped<IUpdateUserCommandHandler, UpdateUserCommandHandler>();
+builder.Services.AddScoped<IDeleteUserCommandHandler, DeleteUserCommandHandler>();
+builder.Services.AddScoped<IUserExistsQueryHandler, UserExistsQueryHandler>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

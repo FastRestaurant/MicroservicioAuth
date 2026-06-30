@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
@@ -32,6 +33,11 @@ namespace Infrastructure.Persistence
 
                 entity.HasIndex(token => token.TokenHash)
                     .IsUnique();
+
+                entity.HasOne<AppUser>()
+                    .WithMany(user => user.RefreshTokens)
+                    .HasForeignKey(token => token.UserId)
+                    .IsRequired();
             });
         }
     }

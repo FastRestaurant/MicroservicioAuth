@@ -1,7 +1,7 @@
+using Application.Interfaces;
+using Application.UseCases.Users.Queries.UserExists;
 using Domain.Constants;
-using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -11,18 +11,22 @@ namespace API.Controllers;
 [Authorize(Roles = ApplicationRoles.AllCsv)]
 public class UsersController : ControllerBase
 {
-    private readonly UserManager<AppUser> _userManager;
+    private readonly IUserExistsQueryHandler _userExistsHandler;
 
-    public UsersController(UserManager<AppUser> userManager)
+    public UsersController(IUserExistsQueryHandler userExistsHandler)
     {
-        _userManager = userManager;
+        _userExistsHandler = userExistsHandler;
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Exists(string id)
+    public async Task<IActionResult> Exists(string id, CancellationToken cancellationToken)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is null)
+        var exists = await _userExistsHandler.Handle(new UserExistsQuery
+        {
+            Id = id
+        }, cancellationToken);
+
+        if (!exists)
             return NotFound();
 
         return NoContent();
