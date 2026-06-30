@@ -61,7 +61,7 @@ namespace Infrastructure.Service
                 issuer: _config["Jwt:Issuer"],
                 audience: _config["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
+                expires: DateTime.UtcNow.AddMinutes(GetConfiguredPositiveInt("Jwt:AccessTokenMinutes", 120)),
                 signingCredentials: creds
             );
 
@@ -84,6 +84,23 @@ namespace Infrastructure.Service
             var hashBytes = SHA256.HashData(tokenBytes);
 
             return Convert.ToHexString(hashBytes);
+        }
+
+        public DateTime GetRefreshTokenExpiration()
+        {
+            return DateTime.UtcNow.AddDays(GetConfiguredPositiveInt("Jwt:RefreshTokenDays", 7));
+        }
+
+        private int GetConfiguredPositiveInt(string key, int defaultValue)
+        {
+            var value = int.TryParse(_config[key], out var configuredValue)
+                ? configuredValue
+                : defaultValue;
+
+            if (value <= 0)
+                throw new InvalidOperationException($"La configuracion {key} debe ser mayor a cero.");
+
+            return value;
         }
     }
 }

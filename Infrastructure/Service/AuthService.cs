@@ -201,7 +201,7 @@ public sealed class AuthService : IAuthService
             Id = Guid.NewGuid(),
             TokenHash = _jwtService.HashRefreshToken(refreshTokenValue),
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            ExpiresAt = _jwtService.GetRefreshTokenExpiration(),
             UserId = user.Id
         };
 
@@ -273,7 +273,7 @@ public sealed class AuthService : IAuthService
             Id = Guid.NewGuid(),
             TokenHash = _jwtService.HashRefreshToken(newRefreshTokenValue),
             CreatedAt = DateTime.UtcNow,
-            ExpiresAt = DateTime.UtcNow.AddDays(7),
+            ExpiresAt = _jwtService.GetRefreshTokenExpiration(),
             UserId = refreshToken.UserId
         };
 
