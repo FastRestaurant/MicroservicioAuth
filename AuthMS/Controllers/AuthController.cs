@@ -177,46 +177,6 @@ namespace API.Controllers
             return ToActionResult(result);
         }
 
-        [Authorize(Roles = ApplicationRoles.Waitress)]
-        [HttpGet("testWaitress")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public IActionResult TestUser()
-        {
-            return Ok("mecera autorizado");
-        }
-
-        [Authorize(Roles = ApplicationRoles.Admin)]
-        [HttpGet("testAdmin")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public IActionResult TestAdmin()
-        {
-            return Ok("Admin autorizado");
-        }
-
-        [Authorize(Roles = ApplicationRoles.Kitchen)]
-        [HttpGet("testkitchen")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public IActionResult Testkitchen()
-        {
-            return Ok("cocinero autorizado");
-        }
-
-        [Authorize(Roles = ApplicationRoles.Cashier)]
-        [HttpGet("testcashier")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public IActionResult Test()
-        {
-            return Ok("cajero autorizado");
-        }
-
         private IActionResult ToActionResult<T>(UseCaseResult<T> result)
         {
             return result.Status switch
